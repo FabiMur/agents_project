@@ -1,0 +1,37 @@
+"""
+Configuración central con Pydantic Settings.
+Lee variables del .env y las valida.
+"""
+
+from pydantic import AliasChoices, Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+    # ─────────────────────────────────────────────────────────────────
+    # AWS Credentials
+    # ─────────────────────────────────────────────────────────────────
+    aws_access_key_id: str = Field(..., validation_alias="AWS_ACCESS_KEY_ID")
+    aws_secret_access_key: str = Field(..., validation_alias="AWS_SECRET_ACCESS_KEY")
+    aws_session_token: str | None = Field(
+        default=None, validation_alias="AWS_SESSION_TOKEN"
+    )
+    aws_region: str = Field(
+        "eu-west-1", validation_alias=AliasChoices("AWS_REGION", "AWS_DEFAULT_REGION")
+    )
+
+    # ─────────────────────────────────────────────────────────────────
+    # Bedrock Models
+    # ─────────────────────────────────────────────────────────────────
+    llm_model_id: str = Field(
+        "us.anthropic.claude-3-5-sonnet-20241022-v2:0", validation_alias="LLM_MODEL_ID"
+    )
+    embedding_model_id: str = Field(
+        "amazon.titan-embed-text-v2:0", validation_alias="EMBED_MODEL_ID"
+    )
+
+
+# Instancia global
+settings = Settings()  # type: ignore[call-arg]
