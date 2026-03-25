@@ -1,21 +1,20 @@
 import json
-import os
 from strands import Agent, tool
 from strands.models.bedrock import BedrockModel
 from src.tools.web_search import web_search
 from src.tools.current_date import get_current_date
+from config.settings import settings
 
 
 # Prompt para el Market Analyst Agent
 SYSTEM_PROMPT = """Eres el "Analista de Mercado" de una casa de empeños y tasación de productos.
-Tu misión es investigar el mercado actual para determinar el valor real de los objetos que nos traen los clientes.
+Tu misión es investigar el mercado actual para determinar el valor real de los objetos que nos pasa el cliente/usuario.
 
 RESPONSABILIDADES:
 1. Buscar precios de venta recientes de objetos similares en plataformas como:
    - eBay (ventas completadas, no solo listados activos)
-   - Catawiki, Todocoleccion, Wallapop, Milanuncios
+   - Wallapop, Milanuncios
    - Casas de subastas especializadas
-   - Tiendas de antigüedades online
 2. Identificar factores que afectan el precio:
    - Estado de conservación (mint, bueno, regular, dañado)
    - Rareza o edición limitada
@@ -52,18 +51,6 @@ ESTRUCTURA DE SALIDA JSON:
 }"""
 
 
-# Modelo de Bedrock para el agente
-REGION_NAME = os.getenv("AWS_REGION", "eu-west-1")
-MODEL_ID = os.getenv("BEDROCK_MODEL_ID", "eu.amazon.nova-2-lite-v1:0")
-TEMP = float(os.getenv("MODEL_TEMPERATURE", "0.2"))
-
-bedrock_model = BedrockModel(
-    model_id=MODEL_ID,
-    region_name=REGION_NAME,
-    temperature=TEMP,
-)
-
-
 # Agente principal
 def analizar_mercado(nombre_objeto: str, descripcion_adicional: str = "") -> dict:
     """
@@ -81,7 +68,12 @@ def analizar_mercado(nombre_objeto: str, descripcion_adicional: str = "") -> dic
     dict
         Diccionario con el análisis de mercado estructurado.
     """
-    modelo = bedrock_model
+    # Instanciar el modelo dentro de la función.
+    modelo = BedrockModel(
+        model_id=settings.llm_model_id_medium,
+        region_name=settings.aws_region,
+        temperature=0.2,
+    )
 
     agente = Agent(
         model=modelo,
@@ -89,7 +81,6 @@ def analizar_mercado(nombre_objeto: str, descripcion_adicional: str = "") -> dic
         tools=[web_search, get_current_date],
     )
 
-    # Construimos el prompt de usuario con toda la información disponible
     prompt_usuario = f"""Analiza el mercado para el siguiente objeto:
 
 OBJETO: {nombre_objeto}
@@ -101,18 +92,16 @@ OBJETO: {nombre_objeto}
 Realiza las búsquedas necesarias y devuelve ÚNICAMENTE el JSON de análisis de mercado,
 sin texto adicional ni bloques de código markdown."""
 
-    texto_respuesta: str = ""  # Inicializar antes del try
+    texto_respuesta: str = ""
 
     try:
         respuesta = agente(prompt_usuario)
 
-        # Obtener texto del mensaje
-        if hasattr(respuesta, "message"):
-            texto_respuesta = str(respuesta.message)
-        else:
-            texto_respuesta = str(respuesta)
+        texto_respuesta = (
+            str(respuesta.message) if hasattr(respuesta, "message") else str(respuesta)
+        )
 
-        # Limpiar posibles bloques de código markdown
+        # Limpiar posibles bloques de código markdown (```json ... ```)
         texto_limpio = texto_respuesta.strip()
         if texto_limpio.startswith("```"):
             lineas = texto_limpio.split("\n")
@@ -120,12 +109,10 @@ sin texto adicional ni bloques de código markdown."""
                 lineas[1:-1] if lineas[-1] == "```" else lineas[1:]
             )
 
-        resultado = json.loads(texto_limpio)
-        return resultado
+        return json.loads(texto_limpio)
 
     except json.JSONDecodeError as e:
         print(f"Error al parsear JSON del Market Analyst Agent: {e}")
-        # Garantizar que texto_respuesta es string antes de hacer slice
         preview = (
             texto_respuesta[:500]
             if isinstance(texto_respuesta, str)
@@ -135,6 +122,7 @@ sin texto adicional ni bloques de código markdown."""
         return _respuesta_error(nombre_objeto, f"Error al parsear respuesta: {e}")
 
     except Exception as e:
+        print(f"Error crítico en el Market Analyst Agent: {e}")
         return _respuesta_error(nombre_objeto, str(e))
 
 
@@ -145,7 +133,7 @@ def market_analyst_tool(nombre_objeto: str, descripcion_adicional: str = "") -> 
     Herramienta que expone el Market Analyst Agent al orquestador.
 
     Investiga el mercado actual para un objeto dado y devuelve un análisis
-    de precios en formato JSON con rangos de valor y precio de compra recomendado.
+    de precios en formato JSON con rangos de valor.
 
     Parámetros
     ----------
@@ -160,14 +148,7 @@ def market_analyst_tool(nombre_objeto: str, descripcion_adicional: str = "") -> 
 
 # Helper de error para mantener la estructura de salida en caso de que falle
 def _respuesta_error(nombre_objeto: str, motivo: str) -> dict:
-    """
-    Devuelve una respuesta de error con la estructura estándar del agente.
-    args:
-    - nombre_objeto: el nombre del objeto que se intentaba analizar
-    - motivo: una descripción del error ocurrido
-    returns:
-    - dict: Diccionario con la estructura estándar de respuesta de error
-    """
+    """Devuelve una respuesta de error con la estructura estándar del agente."""
     return {
         "objeto_analizado": nombre_objeto,
         "busquedas_realizadas": [],
@@ -177,12 +158,6 @@ def _respuesta_error(nombre_objeto: str, motivo: str) -> dict:
             "medio": "No disponible",
             "maximo": "No disponible",
         },
-        "precio_compra_empeño": {
-            "minimo": "No disponible",
-            "recomendado": "No disponible",
-            "maximo": "No disponible",
-        },
-        "factores_valor": [],
         "nivel_demanda": "desconocida",
         "confianza_analisis": "baja",
         "notas_analista": f"Error interno del sistema de análisis: {motivo}",
@@ -194,7 +169,7 @@ if __name__ == "__main__":
     import pprint
 
     resultado = analizar_mercado(
-        nombre_objeto="reloj de bolsillo",
-        descripcion_adicional="caja de plata, 1920, en buen estado, con cadena original",
+        nombre_objeto="reloj de bolsillo j.w. tucker",
+        descripcion_adicional="reloj de bolsillo antiguo j.w. tucker gold hunter de 1860, san francisco",
     )
     pprint.pprint(resultado)
