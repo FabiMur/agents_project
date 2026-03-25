@@ -13,6 +13,10 @@ if "fase_actual" not in st.session_state:
     st.session_state.fase_actual = 0
 if "imagen_subida" not in st.session_state:
     st.session_state.imagen_subida = None
+if "texto_usuario" not in st.session_state:
+    st.session_state.texto_usuario = None
+if "modo_entrada" not in st.session_state:
+    st.session_state.modo_entrada = None
 if "datos_objeto" not in st.session_state:
     st.session_state.datos_objeto = None
 if "historial_chat" not in st.session_state:
@@ -24,6 +28,8 @@ def reiniciar_app():
     """Resetea todo si el usuario cancela o el objeto es rechazado."""
     st.session_state.fase_actual = 0
     st.session_state.imagen_subida = None
+    st.session_state.texto_usuario = None
+    st.session_state.modo_entrada = None
     st.session_state.datos_objeto = None
     st.session_state.historial_chat = []
     st.rerun()
@@ -36,24 +42,21 @@ def confirmar_objeto():
 
 
 # --- INTERFAZ DE USUARIO ---
-st.title("💎 El Tasador de Antigüedades con IA")
+st.title("💎 Tasador de Antigüedades")
 st.write(
     "Sube una foto de tu objeto y nuestro equipo de expertos lo evaluará en tiempo real."
 )
 
-# FASE 0: SUBIDA DE IMAGEN
+# FASE 0: ENTRADA
 if st.session_state.fase_actual == 0:
-    archivo_imagen = st.file_uploader(
-        "Sube la foto de tu artículo (JPG, PNG)", type=["jpg", "jpeg", "png"]
-    )
+    archivo_imagen = st.file_uploader("Foto del artículo", type=["jpg", "jpeg", "png"])
+    texto = st.text_area("Descripción del artículo")
 
-    if archivo_imagen is not None:
-        # Guardamos la imagen temporalmente para que los agentes puedan leerla
-        ruta_temp = "temp_image.jpg"
-        with open(ruta_temp, "wb") as f:
-            f.write(archivo_imagen.getbuffer())
+    if st.button("Enviar", disabled=not archivo_imagen and not texto, type="primary"):
+        if archivo_imagen is not None:
+            st.session_state.imagen_subida = archivo_imagen.getvalue()
 
-        st.session_state.imagen_subida = ruta_temp
+        st.session_state.texto_usuario = texto or None
         st.session_state.fase_actual = 1
         st.rerun()
 
@@ -61,7 +64,9 @@ if st.session_state.fase_actual == 0:
 elif st.session_state.fase_actual == 1:
     if st.session_state.imagen_subida is not None:
         st.image(
-            st.session_state.imagen_subida, caption="Tu artículo", use_column_width=True
+            st.session_state.imagen_subida,
+            caption="Tu artículo",
+            use_container_width=True,
         )
 
     # Aquí llamamos al orquestador (que a su vez llama al Agente Filtro)
