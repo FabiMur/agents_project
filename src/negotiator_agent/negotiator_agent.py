@@ -1,6 +1,9 @@
 from pydantic import BaseModel, Field
+from strands import Agent
+from strands.models.bedrock import BedrockModel
+from config.settings import settings
 
-negotiator_prompt = """
+NEGOTIATOR_PROMPT = """
 Eres el Agente Negociador de una Casa de Empeños de alto nivel. 
 Tu especialidad es el "Storyselling" y la maximización de valor.
 
@@ -46,16 +49,11 @@ class InformeNegociacion(BaseModel):
     )
 
 
-# INFORME A DEVOLVER:
-
-# Narrativa de Valor: Devolver una narrativa convincente que resalte los aspectos únicos del objeto.
-
-# Estrategia de Precio:
-
-# - Precio de Salida (Anclaje): $[Valor sugerido]
-
-# - Precio Objetivo (Venta rápida): $[Valor sugerido]
-
-# - Límite de Negociación: $[Mínimo aceptable]
-
-# - Canal Recomendado: [Ej: Subasta especializada, Marketplace local, Vitrina física...]
+negotiator_agent = Agent(
+    model=BedrockModel(
+        model_id=settings.llm_model_id_small,
+        region_name=settings.aws_region,
+    ),
+    system_prompt=NEGOTIATOR_PROMPT,
+    structured_output_model=InformeNegociacion,
+)
