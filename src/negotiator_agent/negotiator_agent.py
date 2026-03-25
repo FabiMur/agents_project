@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from strands import Agent
+from strands.models.bedrock import BedrockModel
 from config.settings import settings
 
 NEGOTIATOR_PROMPT = """
@@ -49,7 +50,10 @@ class InformeNegociacion(BaseModel):
 
 
 negotiator_agent = Agent(
-    model=settings.llm_model_id_small,
+    model=BedrockModel(
+        model_id=settings.llm_model_id_small,
+        region_name=settings.aws_region,
+    ),
     system_prompt=NEGOTIATOR_PROMPT,
     structured_output_model=InformeNegociacion,
 )
