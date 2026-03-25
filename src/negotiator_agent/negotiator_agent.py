@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from strands import Agent
+from config.settings import settings
 
 NEGOTIATOR_PROMPT = """
 Eres el Agente Negociador de una Casa de Empeños de alto nivel. 
@@ -47,8 +48,8 @@ class InformeNegociacion(BaseModel):
     )
 
 
-agent = Agent(
-    # model = model,
+negotiator_agent = Agent(
+    model=settings.llm_model_id_small,
     system_prompt=NEGOTIATOR_PROMPT,
     structured_output_model=InformeNegociacion,
 )
