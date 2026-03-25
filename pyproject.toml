@@ -12,6 +12,7 @@ dependencies = [
     "bedrock-agentcore-starter-toolkit>=0.3.3",
     "boto3>=1.42.75",
     "ddgs>=9.11.4",
+    "pydantic>=2.12.5",
     "strands-agents>=1.33.0",
     "strands-agents-tools>=0.2.23",
     "streamlit>=1.55.0",
