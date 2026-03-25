@@ -7,26 +7,18 @@ import boto3
 bedrock_client = boto3.client("bedrock-runtime", region_name="eu-west-1")
 
 
-def codificar_imagen(ruta_imagen):
-    """Convierte la imagen local a bytes y especifica el media_type."""
-    with open(ruta_imagen, "rb") as archivo_imagen:
-        imagen_bytes = archivo_imagen.read()
-        imagen_base64 = base64.b64encode(imagen_bytes).decode("utf-8")
-
-        media_type = "image/jpeg"
-        if ruta_imagen.lower().endswith(".png"):
-            media_type = "image/png"
-
-        return imagen_base64, media_type
+def decodificar_imagen(imagen_bytes: bytes, media_type: str = "image/jpeg") -> str:
+    """Convierte bytes de imagen a base64."""
+    return base64.b64encode(imagen_bytes).decode("utf-8")
 
 
-def analizar_antiguedad(ruta_imagen: str) -> dict:
+def analizar_antiguedad(imagen_bytes: bytes, media_type: str = "image/jpeg") -> dict:
     """
     Recibe la ruta de una imagen, la envia a Claude 3
     y devuelve un diccionario Python garantizado.
     """
 
-    imagen_base64, media_type = codificar_imagen(ruta_imagen)
+    imagen_base64 = decodificar_imagen(imagen_bytes, media_type)
 
     # System Prompt exacto para forzar el comportamiento de filtro
     system_prompt = """Eres el "Recepcionista y Filtro de Seguridad" de una prestigiosa casa de empeños y tasación de antigüedades.
