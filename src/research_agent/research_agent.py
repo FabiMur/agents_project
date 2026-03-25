@@ -1,5 +1,6 @@
 import json
 import boto3
+from strands import tool
 
 from src.tools.web_search import web_search
 from config.settings import settings
@@ -79,3 +80,16 @@ def investigar_precio_mercado(nombre_objeto: str) -> dict:
             "resumen_mercado": "Hubo un error al buscar en internet. Se asume un valor simbólico por defecto.",
             "fuentes_usadas": ["Ninguna"],
         }
+
+
+@tool
+def research_tool(nombre_objeto: str) -> str:
+    """Investiga la historia, origen, materiales, fabricante y características clave de un objeto.
+
+    Parámetros
+    ----------
+    nombre_objeto : str
+        Nombre del objeto a investigar.
+    """
+    resultado = investigar_precio_mercado(nombre_objeto)
+    return json.dumps(resultado, ensure_ascii=False, indent=2)

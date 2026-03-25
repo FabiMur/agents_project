@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from strands import Agent
+from strands import Agent, tool
 from strands.models.bedrock import BedrockModel
 from config.settings import settings
 
@@ -57,3 +57,21 @@ negotiator_agent = Agent(
     system_prompt=NEGOTIATOR_PROMPT,
     structured_output_model=InformeNegociacion,
 )
+
+
+@tool
+def negotiator_tool(contexto_objeto: str) -> str:
+    """Genera una estrategia de negociación y venta para un objeto tasado.
+
+    Recibe el contexto completo del objeto (análisis visual, investigación histórica
+    y análisis de mercado) y produce un informe de negociación con precios,
+    narrativa de valor y tácticas de venta.
+
+    Parámetros
+    ----------
+    contexto_objeto : str
+        Texto con toda la información recopilada del objeto (historia, mercado, estado).
+    """
+    resultado = negotiator_agent(contexto_objeto)
+    texto = str(resultado.message) if hasattr(resultado, "message") else str(resultado)
+    return texto

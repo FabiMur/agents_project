@@ -1,6 +1,7 @@
 import json
 import base64
 import boto3
+from strands import tool
 
 from config.settings import settings
 
@@ -125,3 +126,19 @@ EJEMPLO:
             "confianza": "baja",
             "posibles_variantes": [],
         }
+
+
+@tool
+def image_analyst_tool(imagen_base64: str, nombre_archivo: str = "image.jpg") -> str:
+    """Analiza una imagen de un objeto para determinar si es tasable e identificarlo.
+
+    Parámetros
+    ----------
+    imagen_base64 : str
+        Imagen codificada en base64.
+    nombre_archivo : str
+        Nombre del archivo para detectar el formato (jpg, png).
+    """
+    imagen_bytes = base64.b64decode(imagen_base64)
+    resultado = analizar_imagen_detallado(imagen_bytes, nombre_archivo)
+    return json.dumps(resultado, ensure_ascii=False, indent=2)
