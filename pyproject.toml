@@ -7,4 +7,18 @@ authors = [
     { name = "Fabián Murgado", email = "fabian@fabianmurgado.com" }
 ]
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "bedrock-agentcore>=1.4.7",
+    "bedrock-agentcore-starter-toolkit>=0.3.3",
+    "boto3>=1.42.75",
+    "strands-agents>=1.33.0",
+    "strands-agents-tools>=0.2.23",
+]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.5.1",
+    "pyright>=1.1.408",
+    "pytest>=9.0.2",
+    "ruff>=0.15.7",
+]
