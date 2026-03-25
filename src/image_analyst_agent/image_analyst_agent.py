@@ -10,26 +10,22 @@ bedrock_client = boto3.client(
 )
 
 
-def codificar_imagen(ruta_imagen: str):
-    """Convierte la imagen a base64 + detecta media_type."""
-    with open(ruta_imagen, "rb") as archivo_imagen:
-        imagen_bytes = archivo_imagen.read()
-        imagen_base64 = base64.b64encode(imagen_bytes).decode("utf-8")
-
-        media_type = "image/jpeg"
-        if ruta_imagen.lower().endswith(".png"):
-            media_type = "image/png"
-
-        return imagen_base64, media_type
+def codificar_imagen(imagen_bytes: bytes, nombre_archivo: str = "") -> tuple[str, str]:
+    """Convierte bytes de imagen a base64 + detecta media_type."""
+    imagen_base64 = base64.b64encode(imagen_bytes).decode("utf-8")
+    media_type = (
+        "image/png" if nombre_archivo.lower().endswith(".png") else "image/jpeg"
+    )
+    return imagen_base64, media_type
 
 
-def analizar_imagen_detallado(ruta_imagen: str) -> dict:
+def analizar_imagen_detallado(imagen_bytes: bytes, nombre_archivo: str = "") -> dict:
     """
     Analiza la imagen en detalle.
     Devuelve una descripción concreta, breve y útil para el historiador.
     """
 
-    imagen_base64, media_type = codificar_imagen(ruta_imagen)
+    imagen_base64, media_type = codificar_imagen(imagen_bytes, nombre_archivo)
     system_prompt = """
 Eres un "Analista Experto en Identificación y Validación de Objetos" en una casa de empeños profesional.
 
