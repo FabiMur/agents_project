@@ -10,6 +10,7 @@ dependencies = [
     { name = "bedrock-agentcore" },
     { name = "bedrock-agentcore-starter-toolkit" },
     { name = "boto3" },
+    { name = "ddg" },
     { name = "strands-agents" },
     { name = "strands-agents-tools" },
 ]
@@ -27,6 +28,7 @@ requires-dist = [
     { name = "bedrock-agentcore", specifier = ">=1.4.7" },
     { name = "bedrock-agentcore-starter-toolkit", specifier = ">=0.3.3" },
     { name = "boto3", specifier = ">=1.42.75" },
+    { name = "ddg", specifier = ">=0.2.2" },
     { name = "strands-agents", specifier = ">=1.33.0" },
     { name = "strands-agents-tools", specifier = ">=0.2.23" },
 ]
@@ -610,6 +612,12 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/ae/11/7e500d2dd3ba891197b9efd2da5454b74336d64a7cc419aa7327ab74e5f6/cryptography-46.0.5-pp311-pypy311_pp73-manylinux_2_34_x86_64.whl", hash = "sha256:2b7a67c9cd56372f3249b39699f2ad479f6991e62ea15800973b956f4b73e257", size = 4381252, upload-time = "2026-02-10T19:18:27.496Z" },
     { url = "https://files.pythonhosted.org/packages/bc/58/6b3d24e6b9bc474a2dcdee65dfd1f008867015408a271562e4b690561a4d/cryptography-46.0.5-pp311-pypy311_pp73-win_amd64.whl", hash = "sha256:8456928655f856c6e1533ff59d5be76578a7157224dbd9ce6872f25055ab9ab7", size = 3407605, upload-time = "2026-02-10T19:18:29.233Z" },
 ]
+
+[[package]]
+name = "ddg"
+version = "0.2.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/dd/93/458f22ec0c7df0db07992cbdd1253a4aa7f634278354161565b193bd0c1a/ddg-0.2.2.tar.gz", hash = "sha256:db6e5983ebebb8217c602d8b65c425b6c00237583dfa2e49b841d2bcb0b34f15", size = 6188, upload-time = "2012-12-21T14:34:23.074Z" }
 
 [[package]]
 name = "dill"
